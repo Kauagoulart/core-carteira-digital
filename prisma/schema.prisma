@@ -1,0 +1,49 @@
+// Prisma schema - Core bancário da carteira digital
+//
+// Usamos SQLite por padrão por ser zero-config (arquivo local), ideal para
+// desenvolvimento/avaliação. Para usar Postgres ou MySQL, basta:
+//   1. Trocar `provider` abaixo para "postgresql" ou "mysql".
+//   2. Ajustar a `DATABASE_URL` no arquivo `.env`.
+//
+// IMPORTANTE: o `PrismaAccountRepository` e o `PrismaUnitOfWork` (camada de
+// Infraestrutura) são os ÚNICOS arquivos que conhecem este schema. A camada
+// de Domínio/Aplicação não importa nada deste arquivo (DIP).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id          String   @id
+  documentId  String   @unique @map("document_id")
+  documentType String  @map("document_type")
+  ownerName   String   @map("owner_name")
+  balanceCents Int     @map("balance_cents")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  outgoingTransactions Transaction[] @relation("OriginAccount")
+  incomingTransactions Transaction[] @relation("DestinationAccount")
+
+  @@map("accounts")
+}
+
+model Transaction {
+  id                   String   @id
+  type                 String
+  amountCents          Int      @map("amount_cents")
+  status               String
+  description          String?
+  originAccountId      String?  @map("origin_account_id")
+  destinationAccountId String?  @map("destination_account_id")
+  createdAt            DateTime @default(now()) @map("created_at")
+
+  originAccount      Account? @relation("OriginAccount", fields: [originAccountId], references: [id])
+  destinationAccount Account? @relation("DestinationAccount", fields: [destinationAccountId], references: [id])
+
+  @@map("transactions")
+}
