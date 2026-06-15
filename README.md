@@ -61,7 +61,7 @@ tests/
 └── application/   # TransferFundsUseCase (com repositórios em memória)
 ```
 
-## 🎬 Script de demonstração (recomendado para o professor)
+## 🎬 Script de demonstração
 
 Em vez de testar manualmente com `curl`, há um script que executa um fluxo
 completo de operações **diretamente nos Casos de Uso** (sem precisar do
